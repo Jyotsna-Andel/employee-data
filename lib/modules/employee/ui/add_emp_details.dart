@@ -7,7 +7,6 @@ import 'package:MyEmployee/widgets/icon_widget.dart';
 import 'package:MyEmployee/widgets/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
 import 'package:intl/intl.dart';
 // import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 
@@ -24,15 +23,11 @@ class AddEmployeeDetailPage extends StatefulWidget {
 class _AddEmployeeDetailPageState extends State<AddEmployeeDetailPage> {
   EmployeeBloc empBloc = EmployeeBloc();
   TextEditingController nameController = TextEditingController(text: '');
-  // TextEditingController roleController = TextEditingController(text: '');
-  // TextEditingController date1Controller = TextEditingController(text: '');
-  // TextEditingController date2Controller = TextEditingController(text: '');
 
   ValueNotifier<String> nameChangeController = ValueNotifier<String>('');
   ValueNotifier<String> roleChangeController = ValueNotifier<String>('');
   ValueNotifier<String> date1ChangeController = ValueNotifier<String>('');
   ValueNotifier<String> date2ChangeController = ValueNotifier<String>('');
-
   ValueNotifier<bool> loadingController = ValueNotifier<bool>(false);
   ValueNotifier<bool> errorController = ValueNotifier<bool>(false);
 
@@ -114,10 +109,11 @@ class _AddEmployeeDetailPageState extends State<AddEmployeeDetailPage> {
                                       50);
                                 } else {
                                   DateTime? date = DateTime.now();
+                                  DateTime date1DateTime = Utility.parseDate(
+                                      date1ChangeController.value);
                                   DateTime date2DateTime = Utility.parseDate(
                                       date2ChangeController.value);
 
-                                  //   }
                                   if (widget.empData != null) {
                                     empBloc.add(EditEmployeeEvent(
                                         index: widget.employeeIndex,
@@ -128,6 +124,15 @@ class _AddEmployeeDetailPageState extends State<AddEmployeeDetailPage> {
                                         listType: date2DateTime.isAfter(date)
                                             ? 'current_emp'
                                             : 'previous_emp'));
+                                  } else if (date1DateTime
+                                          .isAfter(date2DateTime) ||
+                                      date1DateTime
+                                          .isAtSameMomentAs(date2DateTime)) {
+                                    Utility.showSnackBar(
+                                        'End date should be greater than Start date',
+                                        context,
+                                        40,
+                                        50);
                                   } else {
                                     empBloc.add(AddEmployeeEvent(
                                         id: Utility.uuid(),
@@ -271,7 +276,7 @@ class _AddEmployeeDetailPageState extends State<AddEmployeeDetailPage> {
                   DateTime? date1 = await Utility.showDatePicker(context);
                   if (date1 != null) {
                     String formattedDate =
-                        DateFormat('dd MMM yyyy').format(date1!);
+                        DateFormat('dd MMM yyyy').format(date1);
                     date1ChangeController.value = formattedDate;
                   }
                 },
